@@ -1,25 +1,36 @@
 const fs = require("fs");
-const eddsa = require("../circomlib/src/eddsa.js");
-const mimcjs = require("../circomlib/src/mimc7.js");
+const { buildEddsa, buildBabyjub } = require("circomlibjs");
 
-const preimage = [123,456,789];
-const M = mimcjs.multiHash(preimage);
-const prvKey = Buffer.from('1'.toString().padStart(64,'0'), "hex");
-const pubKey = eddsa.prv2pub(prvKey);
 
-const signature = eddsa.signMiMC(prvKey, M);
+async function main() {
 
-const inputs = {
-    "from_x": pubKey[0].toString(),
-    "from_y": pubKey[1].toString(),
-    "R8x": signature['R8'][0].toString(),
-    "R8y": signature['R8'][1].toString(),
-    "S": signature['S'].toString(),
-    "M": M.toString()
+  const eddsa = await buildEddsa();
+  const babyJub = await buildBabyjub();
+
+  const F = babyJub.F;
+  const msg = F.e(1234);
+  const prvKey = Buffer.from(
+    "0001020304050607080900010203040506070809000102030405060708090001",
+    "hex"
+  );
+  const pubKey = eddsa.prv2pub(prvKey);
+
+  const signature = eddsa.signMiMC(prvKey, msg);
+  const inputs = {
+          "enabled": 1,
+          "Ax": BigInt(F.toObject(pubKey[0])).toString(),
+          "Ay": BigInt(F.toObject(pubKey[1])).toString(),
+          "R8x": BigInt(F.toObject(signature.R8[0])).toString(),
+          "R8y": BigInt(F.toObject(signature.R8[1])).toString(),
+          "S": signature.S.toString(),
+          "M": BigInt(F.toObject(msg)).toString()
+    }
+
+  fs.writeFileSync(
+      "./input.json",
+      JSON.stringify(inputs),
+      "utf-8"
+  )
 }
 
-fs.writeFileSync(
-    "./input.json",
-    JSON.stringify(inputs),
-    "utf-8"
-);
+main();
