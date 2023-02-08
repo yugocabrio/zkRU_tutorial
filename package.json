@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/therealyingtong/RollupNC_tutorial#readme",
   "dependencies": {
+    "blake-hash": "^2.0.0",
     "circom": "^0.5.46",
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
     "markdown-toc": "^1.2.0",
     "snarkjs": "^0.5.0"
   }
