@@ -1,18 +1,25 @@
+pragma circom 2.0.0;
 include "./sample_get_merkle_root.circom";
 include "../circomlib/circuits/mimc.circom";
 
 // checks for existence of leaf in tree of depth k
 
-template LeafExistence(k){
+template LeafExistence(k, l){
 // k is depth of tree
 
-    signal input leaf;
+    signal input preimage[l];
     signal input root;
     signal input paths2_root_pos[k];
     signal input paths2_root[k];
 
+    component leaf = MultiMiMC7(l,91);
+    leaf.k <== 0;
+    for (var i = 0; i < l; i++){
+        leaf.in[i] <== preimage[i];
+    }
+
     component computed_root = GetMerkleRoot(k);
-    computed_root.leaf <== leaf;
+    computed_root.leaf <== leaf.out;
 
     for (var w = 0; w < k; w++){
         computed_root.paths2_root[w] <== paths2_root[w];
@@ -24,4 +31,4 @@ template LeafExistence(k){
 
 }
 
-component main = LeafExistence(2);
+// component main = LeafExistence(2, 3);
